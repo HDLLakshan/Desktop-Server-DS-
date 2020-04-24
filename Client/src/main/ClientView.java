@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -20,13 +22,16 @@ import javax.swing.border.LineBorder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import javax.swing.JButton;
+import javax.swing.JScrollPane;
 
 public class ClientView extends JFrame {
 
 	private JPanel contentPane;
 	static int delay = 0; // delay for 0 sec. 
-	static int period = 4000; // repeat every 10 sec. 
+	static int period = 15000; // repeat every 15 sec. 
 	static Timer timer = new Timer();
+	 static ClientView frame ;
 	/**
 	 * Launch the application.
 	 */
@@ -34,7 +39,7 @@ public class ClientView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ClientView frame = new ClientView();
+					 frame = new ClientView();
 					frame.setVisible(true);
 					
 					
@@ -50,27 +55,41 @@ public class ClientView extends JFrame {
 	 * Create the frame.
 	 */
 	public ClientView() {
-		
-		
-		
+	
+			
 		timer.scheduleAtFixedRate(new TimerTask() 
 		{ 
-		    public void run() 
+		   public void run() 
 		    { 
 		        //Call function
 		    	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				setBounds(200, 200, 925, 532);
+				setBounds(20, 20, 1325, 732);
 				contentPane = new JPanel();
 				contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 				setContentPane(contentPane);
 				contentPane.setLayout(null);
 				
+				
+				
+				JButton btnAddFloor = new JButton("Add Floor");
+				btnAddFloor.setBounds(806, 10, 95, 27);
+				getContentPane().add(btnAddFloor);
+				
+				btnAddFloor.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						FloorAdd fa = new FloorAdd();
+						fa.setVisible(true);
+						setVisible(false);
+						
+					}
+				});
+				
 		   
 		int p = 185;
-		for(int v=0; v<6; v++) {
+		for(int v=0; v <8; v++) {
 		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
 		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
-		lblNewLabel_1.setBounds(p, 22, 81, 20);
+		lblNewLabel_1.setBounds(p, 42, 81, 20);
 		contentPane.add(lblNewLabel_1);
 		p= p + 112;
 		}
@@ -85,12 +104,10 @@ public class ClientView extends JFrame {
 	            service = (Service) Naming.lookup("//localhost/LevelService");
 	            
 	            String s = service.Getdata();
-
-	           System.out.println(s);
 	           
 	           JSONArray jsar = new JSONArray(s);
 	          
-	           int y = 52;
+	           int y = 72;
 	           
 	           for(int j=0; j<jsar.length(); j++) {
 	   		
@@ -151,9 +168,11 @@ public class ClientView extends JFrame {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	        
+		    }}, delay, period);
 		
-	}}, delay, period);
 		
 	}
-
+	
+	
 }
