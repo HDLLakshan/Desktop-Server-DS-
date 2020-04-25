@@ -69,6 +69,15 @@ public class ClientView extends JFrame {
 				setContentPane(contentPane);
 				contentPane.setLayout(null);
 				
+				   int p = 185;
+			   		for(int v=0; v < 10; v++) {
+			   		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
+			   		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
+			   		lblNewLabel_1.setBounds(p, 42, 81, 20);
+			   		contentPane.add(lblNewLabel_1);
+			   		p= p + 112;
+			   		}
+				
 				
 				
 				JButton btnAddFloor = new JButton("Add Floor");
@@ -84,16 +93,6 @@ public class ClientView extends JFrame {
 					}
 				});
 				
-		   
-		int p = 185;
-		for(int v=0; v <8; v++) {
-		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
-		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
-		lblNewLabel_1.setBounds(p, 42, 81, 20);
-		contentPane.add(lblNewLabel_1);
-		p= p + 112;
-		}
-		
 		
 		System.setProperty("java.security.policy", "file:allowall.policy");
 	        
@@ -106,6 +105,10 @@ public class ClientView extends JFrame {
 	            String s = service.Getdata();
 	           
 	           JSONArray jsar = new JSONArray(s);
+	      
+	           
+	        
+	   
 	          
 	           int y = 72;
 	           
