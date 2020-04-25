@@ -221,6 +221,21 @@ public class Server extends UnicastRemoteObject implements Service {
 		}
 	}
 
+	@Override
+	public int getMaxRoomnum() throws RemoteException {
+		int fcnt = getFloorCount();
+		int max = 2;
+		
+		for(int i=1; i<=fcnt ;i++) {
+			int rnum =getRoomCount(String.valueOf(i));
+			if( rnum > max)
+				max = rnum; 
+		}
+		
+		System.out.println(max + "============");
+		return max;
+	}
+
 	
 	
 

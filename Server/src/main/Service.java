@@ -10,4 +10,5 @@ public interface Service  extends Remote{
 	public int getRoomCount(String i) throws RemoteException;
 	public void AddRoom(String fnum) throws RemoteException;
 	public void AddFloor() throws RemoteException;
+	public int getMaxRoomnum() throws RemoteException;
 }
