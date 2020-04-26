@@ -69,14 +69,7 @@ public class ClientView extends JFrame {
 				setContentPane(contentPane);
 				contentPane.setLayout(null);
 				
-				   int p = 185;
-			   		for(int v=0; v < 10; v++) {
-			   		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
-			   		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
-			   		lblNewLabel_1.setBounds(p, 42, 81, 20);
-			   		contentPane.add(lblNewLabel_1);
-			   		p= p + 112;
-			   		}
+				   
 				
 				
 				
@@ -92,7 +85,7 @@ public class ClientView extends JFrame {
 						
 					}
 				});
-				
+				int r = 6;
 		
 		System.setProperty("java.security.policy", "file:allowall.policy");
 	        
@@ -106,6 +99,15 @@ public class ClientView extends JFrame {
 	           
 	           JSONArray jsar = new JSONArray(s);
 	      
+	           int p = 185;
+	            //r = service.getMaxRoomnum();
+		   		for(int v=0; v < r; v++) {
+		   		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
+		   		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
+		   		lblNewLabel_1.setBounds(p, 42, 81, 20);
+		   		contentPane.add(lblNewLabel_1);
+		   		p= p + 112;
+		   		}
 	           
 	        
 	   
