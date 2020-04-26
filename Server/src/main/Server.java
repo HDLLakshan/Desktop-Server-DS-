@@ -223,17 +223,45 @@ public class Server extends UnicastRemoteObject implements Service {
 
 	@Override
 	public int getMaxRoomnum() throws RemoteException {
-		int fcnt = getFloorCount();
-		int max = 2;
-		
-		for(int i=1; i<=fcnt ;i++) {
-			int rnum =getRoomCount(String.valueOf(i));
-			if( rnum > max)
-				max = rnum; 
+		String cnt = "";
+		int fcnt = 0;
+		try {
+			URL url = new URL("http://localhost:5000/MaxRoomCount");
+	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	        conn.setRequestMethod("GET");
+	        conn.setRequestProperty("Accept", "application/json");
+
+	        if (conn.getResponseCode() != 200) {
+	            throw new RuntimeException("Failed : HTTP error code : "
+	                    + conn.getResponseCode());
+	        }
+
+	        Scanner sc = new Scanner(url.openStream());
+	        while(sc.hasNext()) {
+	            cnt += sc.nextLine();
+	        }
+	        
+	        
+	        JSONObject jb = new JSONObject(cnt); 
+              fcnt = jb.getInt("maximumRoom");
+	        conn.disconnect();
+
+	      } catch (MalformedURLException e) {
+
+	        e.printStackTrace();
+
+	      } catch (IOException e) {
+
+	        e.printStackTrace();
+
+	      } catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		System.out.println(max + "============");
-		return max;
+		
+		
+		return fcnt;
 	}
 
 	
