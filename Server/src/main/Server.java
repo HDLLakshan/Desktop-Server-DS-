@@ -19,6 +19,8 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,17 +29,31 @@ import org.json.JSONObject;
 
 public class Server extends UnicastRemoteObject implements Service {
 
+	static int delay = 0; // delay for 0 sec. 
+	static int period = 15000; // repeat every 15 sec. 
+	static Timer timer = new Timer();
+	String allData = "[{}]";
+	int FloorCount = 0;
+	int MaxRoomCount = 0;
 	protected Server() throws RemoteException {
 		super();
 		// TODO Auto-generated constructor stub
+		timer.scheduleAtFixedRate(new TimerTask()  // used for reload frame every 15 second
+					{ 
+						   public void run() 
+						    { 
+		callApi();
+	}}, delay, period);
 	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		// set the policy file as the system security policy
 		System.setProperty("java.security.policy", "file:allowall.policy");
 		
 		try {
 			Server svr = new Server();
+			 // Bind the remote object's stub in the registry
 			Registry registry = LocateRegistry.getRegistry();
 			registry.bind("LevelService", svr);
 			System.out.println("Service Strated........");
@@ -48,96 +64,27 @@ public class Server extends UnicastRemoteObject implements Service {
             System.err.println(abe.getMessage());
         }
 
-	}
+	}  
 
 	@Override
 	public String Getdata() throws RemoteException {
 		// TODO Auto-generated method stub
-		String inline = "";
-		try {
-		URL url = new URL("http://localhost:5000/all");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Accept", "application/json");
-
-        if (conn.getResponseCode() != 200) {
-            throw new RuntimeException("Failed : HTTP error code : "
-                    + conn.getResponseCode());
-        }
-
-        Scanner sc = new Scanner(url.openStream());
-        while(sc.hasNext()) {
-            inline += sc.nextLine();
-        }
-        
-        conn.disconnect();
-
-      } catch (MalformedURLException e) {
-
-        e.printStackTrace();
-
-      } catch (IOException e) {
-
-        e.printStackTrace();
-
-      }
-		
-		
-		
-		return inline;
-	}
+		return allData;
+			}
 
 	@Override
 	public int getFloorCount() throws RemoteException {
-		// TODO Auto-generated method stub
-		String cnt = "";
-		int fcnt = 0;
-		try {
-			URL url = new URL("http://localhost:5000/getFloorCount");
-	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-	        conn.setRequestMethod("GET");
-	        conn.setRequestProperty("Accept", "application/json");
-
-	        if (conn.getResponseCode() != 200) {
-	            throw new RuntimeException("Failed : HTTP error code : "
-	                    + conn.getResponseCode());
-	        }
-
-	        Scanner sc = new Scanner(url.openStream());
-	        while(sc.hasNext()) {
-	            cnt += sc.nextLine();
-	        }
-	        
-	        
-	        JSONObject jb = new JSONObject(cnt); 
-              fcnt = jb.getInt("count");
-	        conn.disconnect();
-
-	      } catch (MalformedURLException e) {
-
-	        e.printStackTrace();
-
-	      } catch (IOException e) {
-
-	        e.printStackTrace();
-
-	      } catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
-		
-		return fcnt;
+		// get number of floors saved in database
+	 	return FloorCount;
 	}
 
 	@Override
-	public int getRoomCount(String i) throws RemoteException {
-		// TODO Auto-generated method stub
+	public int getRoomCount(String floornum) throws RemoteException {
+		// get numbers of rooms according to floor 
 		String cnt = "";
 		int rcnt = 0;
 		try {
-			URL url = new URL("http://localhost:5000/getRoomsCount/" + i);
+			URL url = new URL("http://localhost:5000/getRoomsCount/" + floornum);
 	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	        conn.setRequestMethod("GET");
 	        conn.setRequestProperty("Accept", "application/json");
@@ -146,13 +93,13 @@ public class Server extends UnicastRemoteObject implements Service {
 	            throw new RuntimeException("Failed : HTTP error code : "
 	                    + conn.getResponseCode());
 	        }
-
+          //get JSON type data to string
 	        Scanner sc = new Scanner(url.openStream());
 	        while(sc.hasNext()) {
 	            cnt += sc.nextLine();
 	        }
 	        
-	        
+	        //create JSON type object by string
 	        JSONObject jb = new JSONObject(cnt); 
               rcnt = jb.getInt("count");
 	        conn.disconnect();
@@ -175,14 +122,14 @@ public class Server extends UnicastRemoteObject implements Service {
 	}
 
 	@Override
-	public void AddRoom(String fnum) throws RemoteException {
-		// TODO Auto-generated method stub
+	public void AddRoom(String floornum) throws RemoteException {
+		// server generate the next room number according to given floor number and save in db
 		
 		try {
 		
 			 HttpClient client = HttpClient.newHttpClient();
 		        HttpRequest request = HttpRequest.newBuilder()
-		                .uri(URI.create("http://localhost:5000/addRoom/" + fnum ))
+		                .uri(URI.create("http://localhost:5000/addRoom/" + floornum ))
 		                .POST(HttpRequest.BodyPublishers.ofString(""))
 		                .build();
 
@@ -190,7 +137,7 @@ public class Server extends UnicastRemoteObject implements Service {
 		                HttpResponse.BodyHandlers.ofString());
 
 		        System.out.println(response.body());
-			
+		     callApi();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -200,7 +147,7 @@ public class Server extends UnicastRemoteObject implements Service {
 
 	@Override
 	public void AddFloor() throws RemoteException{
-		// TODO Auto-generated method stub
+		// server generate the next floor number and save in db
 		try {
 		
 			 HttpClient client = HttpClient.newHttpClient();
@@ -213,58 +160,106 @@ public class Server extends UnicastRemoteObject implements Service {
 		                HttpResponse.BodyHandlers.ofString());
 
 		        System.out.println(response.body());
-			
+			    callApi();
 	       
 	        } catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
-	@Override
-	public int getMaxRoomnum() throws RemoteException {
-		String cnt = "";
-		int fcnt = 0;
+	
+	public void callApi() {
+		
 		try {
-			URL url = new URL("http://localhost:5000/MaxRoomCount");
-	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-	        conn.setRequestMethod("GET");
-	        conn.setRequestProperty("Accept", "application/json");
+			//-------------Get All Data by Server -----------
+		
+		URL url = new URL("http://localhost:5000/all");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Accept", "application/json");
 
-	        if (conn.getResponseCode() != 200) {
+        if (conn.getResponseCode() != 200) {
+            throw new RuntimeException("Failed : HTTP error code : "
+                    + conn.getResponseCode());
+        }
+        allData = "";
+        // assign JSON type array to string
+        Scanner sc = new Scanner(url.openStream());
+        while(sc.hasNext()) {
+            allData += sc.nextLine();
+        }
+        System.out.println(allData);
+        conn.disconnect();
+      
+        //----------------Get Floors -------------------
+        String fcnt = "";
+		    URL url1 = new URL("http://localhost:5000/getFloorCount");
+	        HttpURLConnection conn1 = (HttpURLConnection) url1.openConnection();
+	        conn1.setRequestMethod("GET");
+	        conn1.setRequestProperty("Accept", "application/json");
+
+	        if (conn1.getResponseCode() != 200) {
 	            throw new RuntimeException("Failed : HTTP error code : "
-	                    + conn.getResponseCode());
+	                    + conn1.getResponseCode());
 	        }
 
-	        Scanner sc = new Scanner(url.openStream());
-	        while(sc.hasNext()) {
-	            cnt += sc.nextLine();
+	        Scanner sc1 = new Scanner(url1.openStream());
+	        while(sc1.hasNext()) {
+	            fcnt += sc1.nextLine();
 	        }
 	        
+	        JSONObject jb = new JSONObject(fcnt); 
+	        FloorCount = jb.getInt("count");
+	        conn1.disconnect();
 	        
-	        JSONObject jb = new JSONObject(cnt); 
-              fcnt = jb.getInt("maximumRoom");
-	        conn.disconnect();
+	        //------------------- Get MaxRomm
+	        String maxroomcnt = "";
+		    URL url2 = new URL("http://localhost:5000/MaxRoomCount");
+	        HttpURLConnection conn2 = (HttpURLConnection) url2.openConnection();
+	        conn2.setRequestMethod("GET");
+	        conn2.setRequestProperty("Accept", "application/json");
 
-	      } catch (MalformedURLException e) {
+	        if (conn2.getResponseCode() != 200) {
+	            throw new RuntimeException("Failed : HTTP error code : "
+	                    + conn2.getResponseCode());
+	        }
 
-	        e.printStackTrace();
+	        Scanner sc2 = new Scanner(url2.openStream());
+	        while(sc2.hasNext()) {
+	        	maxroomcnt += sc2.nextLine();
+	        }
+	        
+	        JSONObject jb1 = new JSONObject(maxroomcnt); 
+	        MaxRoomCount = jb1.getInt("maximumRoom");
+	        conn2.disconnect();
+	        
+	        //------- Send Email -------------
+	        URL url3 = new URL("http://localhost:5000/MailSender");
+	        HttpURLConnection conn3 = (HttpURLConnection) url3.openConnection();
+	        conn3.setRequestMethod("GET");
+	        conn3.setRequestProperty("Accept", "application/json");
+	        url3.openStream();
+	     
+	        conn3.disconnect();
+	        
+		} catch (MalformedURLException e) {
 
-	      } catch (IOException e) {
+        e.printStackTrace();
 
-	        e.printStackTrace();
+      } catch (IOException e) {
 
-	      } catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        e.printStackTrace();
+
+      } catch (JSONException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 		
-		
-		
-		return fcnt;
 	}
 
-	
-	
-
+	@Override
+	public int getMaxRoomCOunt() throws RemoteException {
+		// TODO Auto-generated method stub
+		return MaxRoomCount;
+	}	
 }
