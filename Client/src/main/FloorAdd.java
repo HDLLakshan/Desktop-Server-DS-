@@ -1,3 +1,4 @@
+// add new room or floor 
 package main;
 
 import java.awt.BorderLayout;
@@ -15,6 +16,7 @@ import javax.swing.JComboBox;
 import java.awt.event.ActionListener;
 import java.rmi.Naming;
 import java.awt.event.ActionEvent;
+import javax.swing.border.LineBorder;
 
 public class FloorAdd extends JFrame {
 
@@ -35,10 +37,6 @@ public class FloorAdd extends JFrame {
 			}
 		});
 	}
-
-	/**
-	 * Create the frame.
-	 */
 	
 	public FloorAdd() {
        System.setProperty("java.security.policy", "file:allowall.policy");
@@ -47,14 +45,14 @@ public class FloorAdd extends JFrame {
        int fct = 0;
 	  try {
 			 service = (Service) Naming.lookup("//localhost/LevelService");
-		     fct =service.getFloorCount();
+		     fct =service.getFloorCount();  // get number of floor by RMI SERVER
 			
 	  }catch(Exception e) {
 				e.printStackTrace();
 			}
 		
 	  String Floornum[] = new String[fct];
-	  
+	  //create string array by number of floors
 	  for(int f=0; f<fct ; f++) {
 		  Floornum[f] = String.valueOf(f+1);
 	  }
@@ -65,7 +63,7 @@ public class FloorAdd extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
+		//create button to add new floot
 		JButton btnNewButton = new JButton("Add New Floor");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -89,8 +87,8 @@ public class FloorAdd extends JFrame {
 		btnNewButton.setBackground(Color.RED);
 		btnNewButton.setBounds(174, 26, 292, 45);
 		contentPane.add(btnNewButton);
-		
-		JLabel lblNewLabel = new JLabel("Add New Room to Current Floor");
+		//add new 
+		JLabel lblNewLabel = new JLabel("Add New Room ");
 		lblNewLabel.setFont(new Font("Tw Cen MT Condensed", Font.ITALIC, 21));
 		lblNewLabel.setForeground(Color.BLUE);
 		lblNewLabel.setBounds(65, 122, 226, 45);

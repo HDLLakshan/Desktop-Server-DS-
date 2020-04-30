@@ -1,3 +1,5 @@
+//admin login. Username and password are admin & 123   
+
 package main;
 
 import java.awt.EventQueue;

@@ -1,3 +1,4 @@
+//main data view jframe 
 package main;
 
 import java.awt.BorderLayout;
@@ -29,12 +30,11 @@ public class ClientView extends JFrame {
 
 	private JPanel contentPane;
 	static int delay = 0; // delay for 0 sec. 
-	static int period = 15000; // repeat every 15 sec. 
+	static int period = 30000; // repeat every 30 sec. 
 	static Timer timer = new Timer();
 	 static ClientView frame ;
-	/**
-	 * Launch the application.
-	 */
+	 int mxrm = 10;
+	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -57,11 +57,11 @@ public class ClientView extends JFrame {
 	public ClientView() {
 	
 			
-		timer.scheduleAtFixedRate(new TimerTask() 
+		timer.scheduleAtFixedRate(new TimerTask()  // used for reload frame every 15 second
 		{ 
 		   public void run() 
 		    { 
-		        //Call function
+		        
 		    	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				setBounds(20, 20, 1325, 732);
 				contentPane = new JPanel();
@@ -70,10 +70,7 @@ public class ClientView extends JFrame {
 				contentPane.setLayout(null);
 				
 				   
-				
-				
-				
-				JButton btnAddFloor = new JButton("Add Floor");
+				JButton btnAddFloor = new JButton("Add"); // button to go to add floor or add room frame
 				btnAddFloor.setBounds(806, 10, 95, 27);
 				getContentPane().add(btnAddFloor);
 				
@@ -85,7 +82,14 @@ public class ClientView extends JFrame {
 						
 					}
 				});
-				int r = 6;
+				 int p = 185;
+			   		for(int v=0; v<mxrm; v++) {  // create Room number label
+			   		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
+			   		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
+			   		lblNewLabel_1.setBounds(p, 42, 81, 20);
+			   		contentPane.add(lblNewLabel_1);
+			   		p= p + 112;
+			   		}
 		
 		System.setProperty("java.security.policy", "file:allowall.policy");
 	        
@@ -94,29 +98,15 @@ public class ClientView extends JFrame {
 	        try {
 	        	
 	            service = (Service) Naming.lookup("//localhost/LevelService");
-	            
-	            String s = service.Getdata();
+	            mxrm = service.getMaxRoomCOunt();
+	            String s = service.Getdata(); //call get all data method by rmi server
+		        JSONArray jsar = new JSONArray(s); // assign return string value to  JSON array 
 	           
-	           JSONArray jsar = new JSONArray(s);
-	      
-	           int p = 185;
-	            //r = service.getMaxRoomnum();
-		   		for(int v=0; v < r; v++) {
-		   		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
-		   		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
-		   		lblNewLabel_1.setBounds(p, 42, 81, 20);
-		   		contentPane.add(lblNewLabel_1);
-		   		p= p + 112;
-		   		}
-	           
-	        
-	   
-	          
 	           int y = 72;
 	           
 	           for(int j=0; j<jsar.length(); j++) {
 	   		
-	        	   JLabel jmain = new JLabel("New label");
+	        	   JLabel jmain = new JLabel(); // create rows according to floor numbers 
 	        	   jmain.setFont(new Font("Tahoma", Font.PLAIN, 15));
 	        	   jmain.setBorder(new LineBorder(new Color(0, 0, 0)));
 	        	   jmain.setBounds(25, y, 132, 72);
@@ -125,8 +115,8 @@ public class ClientView extends JFrame {
 	       		   int x = 167;
 	        	   
 	       		   for(int i=0; i<jsar.getJSONObject(j).getJSONArray("Rooms").length(); i++) {
-	   			       
-	        		   JLabel jlbx = new JLabel("");
+	       			 // create a label to view  smoke level and co2 level, position of this label change with floor and room of each floor
+	        		   JLabel jlbx = new JLabel("");  
 	        		   jlbx.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	        		   jlbx.setBorder(new LineBorder(new Color(0, 0, 0)));
 	        	       jlbx.setBounds(x, y, 102, 32);
@@ -137,7 +127,7 @@ public class ClientView extends JFrame {
 	        		    jlby.setBorder(new LineBorder(new Color(0, 0, 0)));
 	        		    jlby.setBounds(x, y+42, 102, 32);
 	        		    contentPane.add(jlby);
-	        		     			
+	        		     	//get values for relevant room by JSON array 		
 	   			        int sl = jsar.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getInt("SmokeLevel");
 	   			        int cl = jsar.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getInt("CO2Level");
 	   			
@@ -145,23 +135,21 @@ public class ClientView extends JFrame {
 	   			     jlby.setText("Co2 Level  : " +String.valueOf(cl));
 	   			     
 	   			     boolean active = jsar.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getBoolean("Active");
-	   			     
+	   			     //check sensor activation
 	   			     if(!active) {
 	   			    	jlbx.setText(null);
 	   			    	jlby.setText(null);
+	   			     jlbx.setBorder(new LineBorder(Color.RED));
+	   			     jlby.setBorder(new LineBorder(Color.RED));
 	   			     }
-	   			     
+	   			    
 	   			  if(sl >= 5) jlbx.setForeground(Color.RED); else jlbx.setForeground(Color.GREEN);
 	   			if(cl >= 5) jlby.setForeground(Color.RED); else jlby.setForeground(Color.GREEN);
 	   			  
-	   			     
-	   			     
-	   			  x = x +112;
+	   			     x = x +112;
 	   			     
 	   		}
-	       		   
-	       		   
-	           y= y+82;
+	       		    y= y+82;
 	           }
 	         } catch (NotBoundException ex) {
 	            System.err.println(ex.getMessage());
