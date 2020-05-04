@@ -37,7 +37,7 @@ public class Server extends UnicastRemoteObject implements Service {
 	int MaxRoomCount = 0;
 	protected Server() throws RemoteException {
 		super();
-		// TODO Auto-generated constructor stub
+	
 		timer.scheduleAtFixedRate(new TimerTask()  // used for reload frame every 15 second
 					{ 
 						   public void run() 
@@ -80,9 +80,9 @@ public class Server extends UnicastRemoteObject implements Service {
 
 	@Override
 	public int getRoomCount(String floornum) throws RemoteException {
-		// get numbers of rooms according to floor 
+		// get numbers of rooms according to relevant floor number 
 		String cnt = "";
-		int rcnt = 0;
+		int roomcount = 0;
 		try {
 			URL url = new URL("http://localhost:5000/getRoomsCount/" + floornum);
 	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -101,7 +101,7 @@ public class Server extends UnicastRemoteObject implements Service {
 	        
 	        //create JSON type object by string
 	        JSONObject jb = new JSONObject(cnt); 
-              rcnt = jb.getInt("count");
+	        roomcount = jb.getInt("count");
 	        conn.disconnect();
 
 	      } catch (MalformedURLException e) {
@@ -118,7 +118,7 @@ public class Server extends UnicastRemoteObject implements Service {
 		}
 		
 		
-		return rcnt;
+		return roomcount;
 	}
 
 	@Override
@@ -163,7 +163,6 @@ public class Server extends UnicastRemoteObject implements Service {
 			    callApi();
 	       
 	        } catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -212,7 +211,7 @@ public class Server extends UnicastRemoteObject implements Service {
 	        FloorCount = jb.getInt("count");
 	        conn1.disconnect();
 	        
-	        //------------------- Get MaxRomm
+	        //------------------- Get MaxRoom ----------------
 	        String maxroomcnt = "";
 		    URL url2 = new URL("http://localhost:5000/MaxRoomCount");
 	        HttpURLConnection conn2 = (HttpURLConnection) url2.openConnection();
@@ -239,8 +238,15 @@ public class Server extends UnicastRemoteObject implements Service {
 	        conn3.setRequestMethod("GET");
 	        conn3.setRequestProperty("Accept", "application/json");
 	        url3.openStream();
-	     
 	        conn3.disconnect();
+	        
+			/*
+			 * //------ Send Message ---------- URL url4 = new
+			 * URL("http://localhost:5000/SMS-Sender"); HttpURLConnection conn4 =
+			 * (HttpURLConnection) url4.openConnection(); conn4.setRequestMethod("GET");
+			 * conn4.setRequestProperty("Accept", "application/json"); url4.openStream();
+			 * conn4.disconnect();
+			 */
 	        
 		} catch (MalformedURLException e) {
 
@@ -251,7 +257,6 @@ public class Server extends UnicastRemoteObject implements Service {
         e.printStackTrace();
 
       } catch (JSONException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 		
@@ -259,7 +264,48 @@ public class Server extends UnicastRemoteObject implements Service {
 
 	@Override
 	public int getMaxRoomCOunt() throws RemoteException {
-		// TODO Auto-generated method stub
 		return MaxRoomCount;
+	}
+
+	@Override
+	public void SensorOff(String floornum, String roomnum) throws RemoteException {
+		try {
+			
+			 HttpClient client = HttpClient.newHttpClient();
+		        HttpRequest request = HttpRequest.newBuilder()
+		                .uri(URI.create("http://localhost:5000/Off/" +floornum + "/" +roomnum))
+		                .POST(HttpRequest.BodyPublishers.ofString(""))
+		                .build();
+
+		        HttpResponse<String> response = client.send(request,
+		                HttpResponse.BodyHandlers.ofString());
+
+		        System.out.println(response.body());
+			    callApi();
+	       
+	        } catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void SensorOn(String floornum, String roomnum) throws RemoteException {
+		try {
+			
+			 HttpClient client = HttpClient.newHttpClient();
+		        HttpRequest request = HttpRequest.newBuilder()
+		                .uri(URI.create("http://localhost:5000/On/" +floornum + "/" +roomnum))
+		                .POST(HttpRequest.BodyPublishers.ofString(""))
+		                .build();
+
+		        HttpResponse<String> response = client.send(request,
+		                HttpResponse.BodyHandlers.ofString());
+
+		        System.out.println(response.body());
+			    callApi();
+	       
+	        } catch (Exception e) {
+			e.printStackTrace();
+		}
 	}	
 }
