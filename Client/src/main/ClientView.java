@@ -42,9 +42,7 @@ public class ClientView extends JFrame {
 					 frame = new ClientView();
 					frame.setVisible(true);
 					
-					
-
-				} catch (Exception e) {
+					} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -54,9 +52,11 @@ public class ClientView extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	JSONArray temparray = null;	// used for check data changes after refresh
+	JSONArray jsonarry = null;
 	public ClientView() {
 	
-			
+		
 		timer.scheduleAtFixedRate(new TimerTask()  // used for reload frame every 15 second
 		{ 
 		   public void run() 
@@ -71,9 +71,8 @@ public class ClientView extends JFrame {
 				
 				   
 				JButton btnAddFloor = new JButton("Add"); // button to go to add floor or add room frame
-				btnAddFloor.setBounds(806, 10, 95, 27);
+				btnAddFloor.setBounds(805, 10, 95, 27);
 				getContentPane().add(btnAddFloor);
-				
 				btnAddFloor.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						FloorAdd fa = new FloorAdd();
@@ -82,15 +81,27 @@ public class ClientView extends JFrame {
 						
 					}
 				});
-				 int p = 185;
-			   		for(int v=0; v<mxrm; v++) {  // create Room number label
-			   		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
-			   		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
-			   		lblNewLabel_1.setBounds(p, 42, 81, 20);
-			   		contentPane.add(lblNewLabel_1);
-			   		p= p + 112;
-			   		}
-		
+				
+				JButton btnChangeState = new JButton("Change State"); // button to change state of sensors
+				btnChangeState.setBounds(920, 10, 125, 27);
+				getContentPane().add(btnChangeState);
+				btnChangeState.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						ChangeState cs = new ChangeState();
+						cs.setVisible(true);
+						setVisible(false);
+						
+					}
+				});
+				int p = 185;
+		   		for(int v=0; v<mxrm; v++) {  // create Room number labels 
+		   		JLabel lblNewLabel_1 = new JLabel("Room " + (v+1));
+		   		lblNewLabel_1.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 15));
+		   		lblNewLabel_1.setBounds(p, 42, 81, 20);
+		   		contentPane.add(lblNewLabel_1);
+		   		p= p + 112;
+		   		}
+				
 		System.setProperty("java.security.policy", "file:allowall.policy");
 	        
 	        Service service = null;
@@ -99,58 +110,66 @@ public class ClientView extends JFrame {
 	        	
 	            service = (Service) Naming.lookup("//localhost/LevelService");
 	            mxrm = service.getMaxRoomCOunt();
-	            String s = service.Getdata(); //call get all data method by rmi server
-		        JSONArray jsar = new JSONArray(s); // assign return string value to  JSON array 
-	           
+	            String alldata = service.Getdata(); //call get all data method by rmi server
+		         jsonarry = new JSONArray(alldata); // assign return string value to  JSON array 
+	            
 	           int y = 72;
 	           
-	           for(int j=0; j<jsar.length(); j++) {
+	           for(int j=0; j<jsonarry.length(); j++) {
 	   		
 	        	   JLabel jmain = new JLabel(); // create rows according to floor numbers 
 	        	   jmain.setFont(new Font("Tahoma", Font.PLAIN, 15));
 	        	   jmain.setBorder(new LineBorder(new Color(0, 0, 0)));
 	        	   jmain.setBounds(25, y, 132, 72);
 	        	   contentPane.add(jmain);
-	       		   jmain.setText("FLOOR    " +  String.valueOf(jsar.getJSONObject(j).getInt("FloorNo")));
+	       		   jmain.setText("FLOOR    " +  String.valueOf(jsonarry.getJSONObject(j).getInt("FloorNo")));
 	       		   int x = 167;
 	        	   
-	       		   for(int i=0; i<jsar.getJSONObject(j).getJSONArray("Rooms").length(); i++) {
+	       		   for(int i=0; i<jsonarry.getJSONObject(j).getJSONArray("Rooms").length(); i++) {
 	       			 // create a label to view  smoke level and co2 level, position of this label change with floor and room of each floor
-	        		   JLabel jlbx = new JLabel("");  
-	        		   jlbx.setFont(new Font("Tahoma", Font.PLAIN, 14));
-	        		   jlbx.setBorder(new LineBorder(new Color(0, 0, 0)));
-	        	       jlbx.setBounds(x, y, 102, 32);
-	        	       contentPane.add(jlbx);
+	        		   JLabel jlbSmLvl = new JLabel("");  
+	        		   jlbSmLvl.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	        		   jlbSmLvl.setBorder(new LineBorder(new Color(0, 0, 0)));
+	        		   jlbSmLvl.setBounds(x, y, 102, 32);
+	        	       contentPane.add(jlbSmLvl);
 	   			
-	        		    JLabel jlby = new JLabel("");
-	        		    jlby.setFont(new Font("Tahoma", Font.PLAIN, 14));
-	        		    jlby.setBorder(new LineBorder(new Color(0, 0, 0)));
-	        		    jlby.setBounds(x, y+42, 102, 32);
-	        		    contentPane.add(jlby);
+	        		    JLabel jlCLvl = new JLabel("");
+	        		    jlCLvl.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	        		    jlCLvl.setBorder(new LineBorder(new Color(0, 0, 0)));
+	        		    jlCLvl.setBounds(x, y+42, 102, 32);
+	        		    contentPane.add(jlCLvl);
 	        		     	//get values for relevant room by JSON array 		
-	   			        int sl = jsar.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getInt("SmokeLevel");
-	   			        int cl = jsar.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getInt("CO2Level");
+	   			        int smokelevel = jsonarry.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getInt("SmokeLevel");
+	   			        int c02level = jsonarry.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getInt("CO2Level");
 	   			
-	   			     jlbx.setText("Smoke Level:" + String.valueOf(sl));
-	   			     jlby.setText("Co2 Level  : " +String.valueOf(cl));
+	   			     jlbSmLvl.setText("Smoke Level:" + String.valueOf(smokelevel));
+	   			  jlCLvl.setText("Co2 Level  : " +String.valueOf(c02level));
 	   			     
-	   			     boolean active = jsar.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getBoolean("Active");
+	   			     boolean active = jsonarry.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getBoolean("Active");
 	   			     //check sensor activation
 	   			     if(!active) {
-	   			    	jlbx.setText(null);
-	   			    	jlby.setText(null);
-	   			     jlbx.setBorder(new LineBorder(Color.RED));
-	   			     jlby.setBorder(new LineBorder(Color.RED));
+	   			    	jlbSmLvl.setText(null);
+	   			    	jlCLvl.setText(null);
+	   			    	jlbSmLvl.setBorder(new LineBorder(Color.RED));
+	   			    	jlCLvl.setBorder(new LineBorder(Color.RED));
 	   			     }
 	   			    
-	   			  if(sl >= 5) jlbx.setForeground(Color.RED); else jlbx.setForeground(Color.GREEN);
-	   			if(cl >= 5) jlby.setForeground(Color.RED); else jlby.setForeground(Color.GREEN);
-	   			  
-	   			     x = x +112;
+	   			  if(smokelevel >= 5) jlbSmLvl.setForeground(Color.RED); else jlbSmLvl.setForeground(Color.GREEN);
+	   			if(c02level >= 5) jlCLvl.setForeground(Color.RED); else jlCLvl.setForeground(Color.GREEN);
+	   			   x = x +112;
+	   			   
+	   			   if(temparray != null && active) {
+	   				   if(temparray.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getInt("SmokeLevel") != smokelevel)
+	   					 jlCLvl.setBorder(new LineBorder(Color.BLUE));
+	   				   if(temparray.getJSONObject(j).getJSONArray("Rooms").getJSONObject(i).getInt("CO2Level") != c02level)
+	   					   jlCLvl.setBorder(new LineBorder(Color.BLUE));
+	   			   }
 	   			     
 	   		}
-	       		    y= y+82;
+	       		    y= y+86;
 	           }
+	           
+	           
 	         } catch (NotBoundException ex) {
 	            System.err.println(ex.getMessage());
 	        } catch (MalformedURLException ex) {
@@ -161,7 +180,7 @@ public class ClientView extends JFrame {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-	        
+	        temparray = jsonarry;
 		    }}, delay, period);
 		
 		

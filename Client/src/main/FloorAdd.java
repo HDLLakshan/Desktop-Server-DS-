@@ -17,6 +17,8 @@ import java.awt.event.ActionListener;
 import java.rmi.Naming;
 import java.awt.event.ActionEvent;
 import javax.swing.border.LineBorder;
+import java.awt.Component;
+import javax.swing.Box;
 
 public class FloorAdd extends JFrame {
 
@@ -38,10 +40,10 @@ public class FloorAdd extends JFrame {
 		});
 	}
 	
+	Service service = null;
 	public FloorAdd() {
        System.setProperty("java.security.policy", "file:allowall.policy");
         
-       Service service = null;
        int fct = 0;
 	  try {
 			 service = (Service) Naming.lookup("//localhost/LevelService");
@@ -63,15 +65,14 @@ public class FloorAdd extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		//create button to add new floot
+		//create button to add new floor
 		JButton btnNewButton = new JButton("Add New Floor");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int a = JOptionPane.showConfirmDialog(contentPane, "Are You sure to add new floor ", "Confirm Add Floor", JOptionPane.YES_NO_OPTION);
 				if(a==JOptionPane.YES_OPTION){  
 					try {
-					Service service1 = (Service) Naming.lookup("//localhost/LevelService");
-				     service1.AddFloor();
+					 service.AddFloor();
 				     
 				    ClientView c = new ClientView();
 				    c.setVisible(true);
@@ -87,7 +88,7 @@ public class FloorAdd extends JFrame {
 		btnNewButton.setBackground(Color.RED);
 		btnNewButton.setBounds(174, 26, 292, 45);
 		contentPane.add(btnNewButton);
-		//add new 
+		//---------------add new Room ---------------------
 		JLabel lblNewLabel = new JLabel("Add New Room ");
 		lblNewLabel.setFont(new Font("Tw Cen MT Condensed", Font.ITALIC, 21));
 		lblNewLabel.setForeground(Color.BLUE);
@@ -110,8 +111,7 @@ public class FloorAdd extends JFrame {
 				int a = JOptionPane.showConfirmDialog(contentPane, "Are You sure to add new Room to Floor " + fnumber, "Confirm Add Floor", JOptionPane.YES_NO_OPTION);
 				if(a==JOptionPane.YES_OPTION){  
 					try {
-					Service service1 = (Service) Naming.lookup("//localhost/LevelService");
-				     service1.AddRoom(fnumber);
+				     service.AddRoom(fnumber);
 				     ClientView c = new ClientView();
 				     c.setVisible(true);
 					 setVisible(false);
